@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blackmagic Micro Studio Camera 4K G2 Control</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .module {
+            background-color: #2a2a2a;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            flex: 1 1 300px;
+        }
+        h1 {
+            text-align: center;
+            color: #ffffff;
+        }
+        h2 {
+            color: #ffffff;
+            border-bottom: 2px solid #444;
+            padding-bottom: 10px;
+        }
+        button {
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover, button:focus {
+            background-color: #0056b3;
+        }
+        button:active {
+            background-color: #004085;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            box-sizing: border-box;
+            background-color: #3a3a3a;
+            border: 1px solid #555;
+            color: #e0e0e0;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            .module {
+                flex: 1 1 100%;
+            }
+            button {
+                width: 100%;
+            }
+        
+        }
+        .status-message {
+    display: none;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.status-success {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.status-error {
+    background-color: #f44336;
+    color: white;
+}
+.auto-exposure {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.resetButton {
+    margin-left: 10px;
+    padding: 2px 5px;
+    font-size: 0.8em;
+    cursor: pointer;
+}
+    </style>
+</head>
+<body>
+    <h1>Blackmagic Micro Studio Camera 4K G2 Control</h1>
+    <div class="container">
+        <div id="systemControl" class="module">
+            <h2>System Control</h2>
+            <button id="getSystemInfo">Get Current System Info</button>
+            <div id="systemInfo"></div>
+            <hr>
+            <h3>System Settings</h3>
+            <div>
+                <label for="codecFormat">Codec Format:</label>
+                <span id="codecFormat"></span>
+            </div>
+            <div>
+                <label for="frameRate">Frame Rate:</label>
+                <select id="frameRate"></select>
+            </div>
+            <div>
+                <label for="offSpeedEnabled">Off-Speed Frame Rate:</label>
+                <input type="checkbox" id="offSpeedEnabled">
+            </div>
+            <div id="offSpeedControls" style="display: none;">
+                <label for="offSpeedFrameRate">Off-Speed Frame Rate:</label>
+                <input type="range" id="offSpeedFrameRate" min="5" max="60" step="1">
+                <span id="offSpeedFrameRateValue"></span>
+            </div>
+            <button id="updateSystemSettings">Update Settings</button>
+            <div id="statusMessage" class="status-message"></div>
+        </div>
+            <div id="presetControl" class="module">
+            <h2>Preset Control</h2>
+            <div id="presetControl" class="module">
+                <h2>Preset Control</h2>
+                <div>
+                    <select id="presetList"></select>
+                    <button id="loadPreset">Load Preset</button>
+                </div>
+                <!-- Commented out save and delete functionality due to CORS issue
+                <div>
+                    <input type="text" id="newPresetName" placeholder="New Preset Name">
+                    <button id="savePreset">Save Current Settings as Preset</button>
+                </div>
+                <button id="deletePreset">Delete Selected Preset</button>
+                -->
+                <div id="presetStatusMessage" class="status-message"></div>
+            </div>        </div>
+            <div id="audioControl" class="module">
+                <h2>Audio Control</h2>
+                <div id="inputModeSelection">
+                    <h3>Input Mode Selection</h3>
+                    <div>
+                        <label for="cameraMicMode">Camera Mic Mode:</label>
+                        <select id="cameraMicMode">
+                            <option value="Mono">Mono</option>
+                            <option value="Stereo">Stereo</option>
+                            <option value="Off">Off</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="3_5mmMode">3.5mm Mode:</label>
+                        <select id="3_5mmMode">
+                            <option value="Mono">Mono</option>
+                            <option value="Stereo">Stereo</option>
+                            <option value="Off">Off</option>
+                        </select>
+                    </div>
+                    <div id="3_5mmGainContainer" style="display: none;">
+                        <label for="3_5mmGain">3.5mm Gain:</label>
+                        <select id="3_5mmGain">
+                            <option value="Line">Line</option>
+                            <option value="Mic">Mic</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label for="channel1Source">Channel 1 Source:</label>
+                    <select id="channel1Source"></select>
+                </div>
+                <div>
+                    <label for="channel1Level">Channel 1 Level:</label>
+                    <input type="range" id="channel1Level" min="-10" max="40" step="0.1">
+                    <span id="channel1LevelValue"></span>
+                </div>
+                <div>
+                    <label for="channel2Source">Channel 2 Source:</label>
+                    <select id="channel2Source"></select>
+                </div>
+                <div>
+                    <label for="channel2Level">Channel 2 Level:</label>
+                    <input type="range" id="channel2Level" min="-10" max="40" step="0.1">
+                    <span id="channel2LevelValue"></span>
+                </div>
+                <button id="updateAudioSettings">Update Audio Settings</button>
+                <div id="audioStatusMessage" class="status-message"></div>
+            </div>
+        </div>
+        <div id="lensControl" class="module">
+            <h2>Lens Control</h2>
+            
+            <div>
+                <label for="apertureSlider">Aperture (f-stop):</label>
+                <input type="range" id="apertureSlider" min="1.8" max="22" step="0.1" value="5.6">
+                <span id="apertureValue">5.6</span>
+            </div>
+        
+            <div id="zoomControl">
+                <label for="zoomSlider">Zoom:</label>
+                <input type="range" id="zoomSlider" min="0" max="1" step="0.01" value="0.5">
+                <span id="zoomValue">0.5</span>
+            </div>
+        
+            <div>
+                <label for="focusSlider">Focus:</label>
+                <input type="range" id="focusSlider" min="0" max="1" step="0.01" value="0.5">
+                <span id="focusValue">0.5</span>
+            </div>
+        
+            <button id="autoFocusButton">Auto Focus</button>
+        
+            <div id="lensStatusMessage" class="status-message"></div>
+        </div>
+        <div id="videoControl" class="module">
+            <h2>Video Control</h2>
+            
+            <div>
+                <label for="gainSlider">Gain (dB):</label>
+                <input type="range" id="gainSlider" min="0" max="30" step="2" value="0">
+                <span id="gainValue">0</span>
+            </div>
+        
+            <div>
+                <label for="whiteBalanceSlider">White Balance (K):</label>
+                <input type="range" id="whiteBalanceSlider" min="2500" max="10000" step="100" value="5600">
+                <span id="whiteBalanceValue">5600</span>
+            </div>
+        
+            <div>
+                <label for="tintSlider">Tint:</label>
+                <input type="range" id="tintSlider" min="-50" max="50" step="1" value="0">
+                <span id="tintValue">0</span>
+            </div>
+        
+            <div>
+                <label for="shutterSlider">Shutter Speed (1/x sec):</label>
+                <input type="range" id="shutterSlider" min="24" max="2000" step="1" value="48">
+                <span id="shutterValue">48</span>
+            </div>
+        
+            <div>
+                <label for="autoExposureSelect">Auto Exposure Mode:</label>
+                <select id="autoExposureSelect">
+                    <option value="Off">Off</option>
+                    <option value="Continuous">Continuous</option>
+                    <option value="OneShot">One Shot</option>
+                </select>
+            </div>
+            <span id="autoExposureIndicator" style="display: none; color: green; margin-left: 10px;"></span>
+            <button id="autoWhiteBalanceButton">Auto White Balance</button>
+        
+            <div id="videoStatusMessage" class="status-message"></div>
+        </div> </div>
+        <div id="colorCorrection" class="module">
+            <h2>Color Correction</h2>
+            <div id="colorCorrection" class="module">
+                <h2>Color Correction</h2>
+                <button id="resetAllColorCorrection">Reset All</button>
+                <!-- Rest of the color correction HTML remains the same -->
+            <div>
+                <h3>Lift</h3>
+                <div>
+                    <label for="liftRed">Red:</label>
+                    <input type="range" id="liftRed" min="-2" max="2" step="0.01" value="0">
+                    <span id="liftRedValue">0</span>
+                    <button class="resetButton" data-control="lift" data-key="red">Reset</button>
+                </div>
+                <div>
+                    <label for="liftGreen">Green:</label>
+                    <input type="range" id="liftGreen" min="-2" max="2" step="0.01" value="0">
+                    <span id="liftGreenValue">0</span>
+                    <button class="resetButton" data-control="lift" data-key="green">Reset</button>
+                </div>
+                <div>
+                    <label for="liftBlue">Blue:</label>
+                    <input type="range" id="liftBlue" min="-2" max="2" step="0.01" value="0">
+                    <span id="liftBlueValue">0</span>
+                    <button class="resetButton" data-control="lift" data-key="blue">Reset</button>
+                </div>
+                <div>
+                    <label for="liftLuma">Luma:</label>
+                    <input type="range" id="liftLuma" min="-2" max="2" step="0.01" value="0">
+                    <span id="liftLumaValue">0</span>
+                    <button class="resetButton" data-control="lift" data-key="luma">Reset</button>
+                </div>
+            </div>
+        
+            <div>
+                <h3>Gamma</h3>
+                <div>
+                    <label for="gammaRed">Red:</label>
+                    <input type="range" id="gammaRed" min="-4" max="4" step="0.01" value="0">
+                    <span id="gammaRedValue">0</span>
+                    <button class="resetButton" data-control="gamma" data-key="red">Reset</button>
+                </div>
+                <div>
+                    <label for="gammaGreen">Green:</label>
+                    <input type="range" id="gammaGreen" min="-4" max="4" step="0.01" value="0">
+                    <span id="gammaGreenValue">0</span>
+                    <button class="resetButton" data-control="gamma" data-key="green">Reset</button>
+                </div>
+                <div>
+                    <label for="gammaBlue">Blue:</label>
+                    <input type="range" id="gammaBlue" min="-4" max="4" step="0.01" value="0">
+                    <span id="gammaBlueValue">0</span>
+                    <button class="resetButton" data-control="gamma" data-key="blue">Reset</button>
+                </div>
+                <div>
+                    <label for="gammaLuma">Luma:</label>
+                    <input type="range" id="gammaLuma" min="-4" max="4" step="0.01" value="0">
+                    <span id="gammaLumaValue">0</span>
+                    <button class="resetButton" data-control="gamma" data-key="luma">Reset</button>
+                </div>
+            </div>
+        
+            <div>
+                <h3>Gain</h3>
+                <div>
+                    <label for="gainRed">Red:</label>
+                    <input type="range" id="gainRed" min="0" max="16" step="0.01" value="1">
+                    <span id="gainRedValue">1</span>
+                    <button class="resetButton" data-control="gain" data-key="red">Reset</button>
+                </div>
+                <div>
+                    <label for="gainGreen">Green:</label>
+                    <input type="range" id="gainGreen" min="0" max="16" step="0.01" value="1">
+                    <span id="gainGreenValue">1</span>
+                    <button class="resetButton" data-control="gain" data-key="green">Reset</button>
+                </div>
+                <div>
+                    <label for="gainBlue">Blue:</label>
+                    <input type="range" id="gainBlue" min="0" max="16" step="0.01" value="1">
+                    <span id="gainBlueValue">1</span>
+                    <button class="resetButton" data-control="gain" data-key="blue">Reset</button>
+                </div>
+                <div>
+                    <label for="gainLuma">Luma:</label>
+                    <input type="range" id="gainLuma" min="0" max="16" step="0.01" value="1">
+                    <span id="gainLumaValue">1</span>
+                    <button class="resetButton" data-control="gain" data-key="luma">Reset</button>
+                </div>
+            </div>
+        
+            <div>
+                <h3>Offset</h3>
+                <div>
+                    <label for="offsetRed">Red:</label>
+                    <input type="range" id="offsetRed" min="-8" max="8" step="0.01" value="0">
+                    <span id="offsetRedValue">0</span>
+                    <button class="resetButton" data-control="offset" data-key="red">Reset</button>
+                </div>
+                <div>
+                    <label for="offsetGreen">Green:</label>
+                    <input type="range" id="offsetGreen" min="-8" max="8" step="0.01" value="0">
+                    <span id="offsetGreenValue">0</span>
+                    <button class="resetButton" data-control="offset" data-key="green">Reset</button>
+                </div>
+                <div>
+                    <label for="offsetBlue">Blue:</label>
+                    <input type="range" id="offsetBlue" min="-8" max="8" step="0.01" value="0">
+                    <span id="offsetBlueValue">0</span>
+                    <button class="resetButton" data-control="offset" data-key="blue">Reset</button>
+                </div>
+                <div>
+                    <label for="offsetLuma">Luma:</label>
+                    <input type="range" id="offsetLuma" min="-8" max="8" step="0.01" value="0">
+                    <span id="offsetLumaValue">0</span>
+                    <button class="resetButton" data-control="offset" data-key="luma">Reset</button>
+                </div>
+            </div>
+        
+            <div>
+                <h3>Contrast</h3>
+                <div>
+                    <label for="contrastPivot">Pivot:</label>
+                    <input type="range" id="contrastPivot" min="0" max="1" step="0.01" value="0.5">
+                    <span id="contrastPivotValue">0.5</span>
+                    <button class="resetButton" data-control="contrast" data-key="pivot">Reset</button>
+                </div>
+                <div>
+                    <label for="contrastAdjust">Adjust:</label>
+                    <input type="range" id="contrastAdjust" min="0" max="2" step="0.01" value="1">
+                    <span id="contrastAdjustValue">1</span>
+                    <button class="resetButton" data-control="contrast" data-key="adjust">Reset</button>
+                </div>
+            </div>
+        
+            <div>
+                <h3>Color</h3>
+                <div>
+                    <label for="colorHue">Hue:</label>
+                    <input type="range" id="colorHue" min="-1" max="1" step="0.01" value="0">
+                    <span id="colorHueValue">0</span>
+                    <button class="resetButton" data-control="color" data-key="hue">Reset</button>
+                </div>
+                <div>
+                    <label for="colorSaturation">Saturation:</label>
+                    <input type="range" id="colorSaturation" min="0" max="2" step="0.01" value="1">
+                    <span id="colorSaturationValue">1</span>
+                    <button class="resetButton" data-control="color" data-key="saturation">Reset</button>
+                </div>
+            </div>
+        
+            <div>
+                <h3>Luma Contribution</h3>
+                <div>
+                    <label for="lumaContributionLumaContribution">Luma Contribution:</label>
+                    <input type="range" id="lumaContributionLumaContribution" min="0" max="1" step="0.01" value="1">
+                    <span id="lumaContributionLumaContributionValue">1</span>
+                    <button class="resetButton" data-control="lumaContribution" data-key="lumaContribution">Reset</button>
+                </div>
+            </div>
+        
+            <div id="colorStatusMessage" class="status-message"></div>
+        </div></div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

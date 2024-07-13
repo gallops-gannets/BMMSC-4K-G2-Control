@@ -4,435 +4,453 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blackmagic Micro Studio Camera 4K G2 Control</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 20px;
-            background-color: #1a1a1a;
-            color: #e0e0e0;
-        }
-        .container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
+            padding-top: 20px;
+            padding-bottom: 20px;
         }
         .module {
-            background-color: #2a2a2a;
-            border-radius: 5px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
             padding: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            flex: 1 1 300px;
+            margin-bottom: 20px;
         }
-        h1 {
-            text-align: center;
-            color: #ffffff;
+        .form-range {
+            height: 2rem;
         }
-        h2 {
-            color: #ffffff;
-            border-bottom: 2px solid #444;
-            padding-bottom: 10px;
+        .form-check-input {
+            width: 2rem;
+            height: 2rem;
         }
-        button {
-            background-color: #007bff;
-            color: #ffffff;
-            border: none;
-            padding: 15px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 10px 0;
-            font-size: 16px;
-            transition: background-color 0.3s;
+        .form-select {
+            height: 3rem;
         }
-        button:hover, button:focus {
-            background-color: #0056b3;
+        .btn {
+            font-size: 1.2rem;
+            padding: 10px 20px;
         }
-        button:active {
-            background-color: #004085;
-        }
-        input, select {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            box-sizing: border-box;
-            background-color: #3a3a3a;
-            border: 1px solid #555;
-            color: #e0e0e0;
-            font-size: 16px;
-            border-radius: 5px;
-        }
-        input:focus, select:focus {
-            outline: none;
-            border-color: #007bff;
-        }
-        /* Responsive design */
         @media (max-width: 768px) {
             .container {
-                flex-direction: column;
+                max-width: 100%;
             }
-            .module {
-                flex: 1 1 100%;
-            }
-            button {
-                width: 100%;
-            }
-        
         }
-        .status-message {
-    display: none;
-    padding: 10px;
-    margin-top: 10px;
-    border-radius: 5px;
-    font-weight: bold;
-    transition: opacity 0.5s ease-in-out;
+        body {
+    background-color: #121212;
+    color: #e0e0e0;
 }
 
-.status-success {
+.module {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+}
+
+.btn-primary {
+    background-color: #2196F3;
+    border-color: #2196F3;
+}
+
+.btn-primary:hover {
+    background-color: #1976D2;
+    border-color: #1976D2;
+}
+
+.btn-success {
     background-color: #4CAF50;
-    color: white;
+    border-color: #4CAF50;
 }
 
-.status-error {
-    background-color: #f44336;
-    color: white;
+.btn-success:hover {
+    background-color: #388E3C;
+    border-color: #388E3C;
 }
-.auto-exposure {
-    opacity: 0.5;
-    cursor: not-allowed;
+
+.btn-warning {
+    background-color: #FFC107;
+    border-color: #FFC107;
+    color: #000;
 }
-.resetButton {
-    margin-left: 10px;
-    padding: 2px 5px;
-    font-size: 0.8em;
+
+.btn-warning:hover {
+    background-color: #FFA000;
+    border-color: #FFA000;
+    color: #000;
+}
+
+.btn-outline-secondary {
+    color: #9e9e9e;
+    border-color: #9e9e9e;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #9e9e9e;
+    color: #121212;
+}
+
+.form-control, .form-select {
+    background-color: #2c2c2c;
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: #3c3c3c;
+    border-color: #666;
+    color: #ffffff;
+}
+
+.form-range::-webkit-slider-thumb {
+    background: #2196F3;
+}
+
+.form-range::-moz-range-thumb {
+    background: #2196F3;
+}
+
+.form-range::-ms-thumb {
+    background: #2196F3;
+}
+
+.nav-tabs .nav-link {
+    color: #e0e0e0;
+}
+
+.nav-tabs .nav-link.active {
+    background-color: #1e1e1e;
+    border-color: #444 #444 #1e1e1e;
+    color: #ffffff;
+}
+
+.tab-content {
+    background-color: #1e1e1e;
+    border: 1px solid #444;
+    border-top: none;
+}
+.module-header {
     cursor: pointer;
+}
+
+.module-header::after {
+    content: '\25BC';
+    float: right;
+    transition: transform 0.3s ease;
+}
+
+.module-header.collapsed::after {
+    transform: rotate(-90deg);
+}
+.card {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+}
+
+.card-header {
+    background-color: #2c2c2c;
+    border-bottom: 1px solid #333;
+}
+
+.card-body {
+    background-color: #1e1e1e;
 }
     </style>
 </head>
 <body>
-    <h1>Blackmagic Micro Studio Camera 4K G2 Control</h1>
     <div class="container">
+        <h1 class="text-center mb-4">Blackmagic Micro Studio Camera 4K G2 Control</h1>
+
         <div id="systemControl" class="module">
             <h2>System Control</h2>
-            <button id="getSystemInfo">Get Current System Info</button>
-            <div id="systemInfo"></div>
-            <hr>
-            <h3>System Settings</h3>
-            <div>
-                <label for="codecFormat">Codec Format:</label>
-                <span id="codecFormat"></span>
+           <!-- <button id="getSystemInfo" class="btn btn-primary mb-3">Get Current System Info</button>-->
+            <div id="systemInfo" class="mb-3"></div>
+
+        <!--    <h3>System Settings</h3> -->
+            <div class="mb-3">
+                <label for="codecFormat" class="form-label">Codec Format:</label>
+                <span id="codecFormat" class="ms-2"></span>
             </div>
-            <div>
-                <label for="frameRate">Frame Rate:</label>
-                <select id="frameRate"></select>
+            <div class="mb-3">
+                <label for="frameRate" class="form-label">Frame Rate:</label>
+                <select id="frameRate" class="form-select"></select>
             </div>
-            <div>
-                <label for="offSpeedEnabled">Off-Speed Frame Rate:</label>
-                <input type="checkbox" id="offSpeedEnabled">
+            <div class="mb-3 form-check form-switch">
+                <input type="checkbox" class="form-check-input" id="offSpeedEnabled">
+                <label class="form-check-label" for="offSpeedEnabled">Off-Speed Frame Rate</label>
             </div>
-            <div id="offSpeedControls" style="display: none;">
-                <label for="offSpeedFrameRate">Off-Speed Frame Rate:</label>
-                <input type="range" id="offSpeedFrameRate" min="5" max="60" step="1">
-                <span id="offSpeedFrameRateValue"></span>
+            <div id="offSpeedControls" class="mb-3" style="display: none;">
+                <label for="offSpeedFrameRate" class="form-label">Off-Speed Frame Rate: <span id="offSpeedFrameRateValue"></span></label>
+                <input type="range" class="form-range" id="offSpeedFrameRate" min="1" max="60" step="0.01">
             </div>
-            <button id="updateSystemSettings">Update Settings</button>
-            <div id="statusMessage" class="status-message"></div>
+            <button id="updateSystemSettings" class="btn btn-success">Update Settings</button>
         </div>
-            <div id="presetControl" class="module">
+
+        <div id="presetControl" class="module">
             <h2>Preset Control</h2>
-            <div id="presetControl" class="module">
-                <h2>Preset Control</h2>
-                <div>
-                    <select id="presetList"></select>
-                    <button id="loadPreset">Load Preset</button>
-                </div>
-                <!-- Commented out save and delete functionality due to CORS issue
-                <div>
-                    <input type="text" id="newPresetName" placeholder="New Preset Name">
-                    <button id="savePreset">Save Current Settings as Preset</button>
-                </div>
-                <button id="deletePreset">Delete Selected Preset</button>
-                -->
-                <div id="presetStatusMessage" class="status-message"></div>
-            </div>        </div>
-            <div id="audioControl" class="module">
-                <h2>Audio Control</h2>
-                <div id="inputModeSelection">
-                    <h3>Input Mode Selection</h3>
-                    <div>
-                        <label for="cameraMicMode">Camera Mic Mode:</label>
-                        <select id="cameraMicMode">
-                            <option value="Mono">Mono</option>
-                            <option value="Stereo">Stereo</option>
-                            <option value="Off">Off</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="3_5mmMode">3.5mm Mode:</label>
-                        <select id="3_5mmMode">
-                            <option value="Mono">Mono</option>
-                            <option value="Stereo">Stereo</option>
-                            <option value="Off">Off</option>
-                        </select>
-                    </div>
-                    <div id="3_5mmGainContainer" style="display: none;">
-                        <label for="3_5mmGain">3.5mm Gain:</label>
-                        <select id="3_5mmGain">
-                            <option value="Line">Line</option>
-                            <option value="Mic">Mic</option>
-                        </select>
-                    </div>
-                </div>
-                <div>
-                    <label for="channel1Source">Channel 1 Source:</label>
-                    <select id="channel1Source"></select>
-                </div>
-                <div>
-                    <label for="channel1Level">Channel 1 Level:</label>
-                    <input type="range" id="channel1Level" min="-10" max="40" step="0.1">
-                    <span id="channel1LevelValue"></span>
-                </div>
-                <div>
-                    <label for="channel2Source">Channel 2 Source:</label>
-                    <select id="channel2Source"></select>
-                </div>
-                <div>
-                    <label for="channel2Level">Channel 2 Level:</label>
-                    <input type="range" id="channel2Level" min="-10" max="40" step="0.1">
-                    <span id="channel2LevelValue"></span>
-                </div>
-                <button id="updateAudioSettings">Update Audio Settings</button>
-                <div id="audioStatusMessage" class="status-message"></div>
+            <div class="mb-3">
+                <label for="presetList" class="form-label">Select Preset:</label>
+                <select id="presetList" class="form-select"></select>
             </div>
+            <button id="loadPreset" class="btn btn-primary">Load Preset</button>
+            <div id="presetStatusMessage" class="status-message"></div>
         </div>
+
+        <div id="audioControl" class="module">
+            <h2>Audio Control</h2>
+            <div id="inputModeSelection" class="mb-3">
+                <h3>Input Mode Selection</h3>
+                <div class="mb-3">
+                    <label for="cameraMicMode" class="form-label">Camera Mic Mode:</label>
+                    <select id="cameraMicMode" class="form-select">
+                        <option value="Mono">Mono</option>
+                        <option value="Stereo">Stereo</option>
+                        <option value="Off">Off</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="3_5mmMode" class="form-label">3.5mm Mode:</label>
+                    <select id="3_5mmMode" class="form-select">
+                        <option value="Mono">Mono</option>
+                        <option value="Stereo">Stereo</option>
+                        <option value="Off">Off</option>
+                    </select>
+                </div>
+                <div id="3_5mmGainContainer" class="mb-3" style="display: none;">
+                    <label for="3_5mmGain" class="form-label">3.5mm Gain:</label>
+                    <select id="3_5mmGain" class="form-select">
+                        <option value="Line">Line</option>
+                        <option value="Mic">Mic</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="channel1Source" class="form-label">Channel 1 Source:</label>
+                <select id="channel1Source" class="form-select"></select>
+            </div>
+            <div class="mb-3">
+                <label for="channel1Level" class="form-label">Channel 1 Level: <span id="channel1LevelValue"></span></label>
+                <input type="range" class="form-range" id="channel1Level" min="-6" max="6" step="0.1">
+            </div>
+            <div class="mb-3">
+                <label for="channel2Source" class="form-label">Channel 2 Source:</label>
+                <select id="channel2Source" class="form-select"></select>
+            </div>
+            <div class="mb-3">
+                <label for="channel2Level" class="form-label">Channel 2 Level: <span id="channel2LevelValue"></span></label>
+                <input type="range" class="form-range" id="channel2Level" min="-6" max="6" step="0.1">
+            </div>
+            <button id="updateAudioSettings" class="btn btn-success">Update Audio Settings</button>
+            <div id="audioStatusMessage" class="status-message"></div>
+        </div>
+
         <div id="lensControl" class="module">
             <h2>Lens Control</h2>
-            
-            <div>
-                <label for="apertureSlider">Aperture (f-stop):</label>
-                <input type="range" id="apertureSlider" min="1.8" max="22" step="0.1" value="5.6">
-                <span id="apertureValue">5.6</span>
+            <div class="mb-3">
+                <label for="apertureSlider" class="form-label">Aperture (f-stop): <span id="apertureValue">5.6</span></label>
+                <input type="range" class="form-range" id="apertureSlider" min="1.4" max="22" step="0.1">
             </div>
-        
-            <div id="zoomControl">
-                <label for="zoomSlider">Zoom:</label>
-                <input type="range" id="zoomSlider" min="0" max="1" step="0.01" value="0.5">
-                <span id="zoomValue">0.5</span>
+            <div id="zoomControl" class="mb-3">
+                <label for="zoomSlider" class="form-label">Zoom: <span id="zoomValue">0.5</span></label>
+                <input type="range" class="form-range" id="zoomSlider" min="0" max="1" step="0.01">
             </div>
-        
-            <div>
-                <label for="focusSlider">Focus:</label>
-                <input type="range" id="focusSlider" min="0" max="1" step="0.01" value="0.5">
-                <span id="focusValue">0.5</span>
+            <div class="mb-3">
+                <label for="focusSlider" class="form-label">Focus: <span id="focusValue">0.5</span></label>
+                <input type="range" class="form-range" id="focusSlider" min="0" max="1" step="0.01">
             </div>
-        
-            <button id="autoFocusButton">Auto Focus</button>
-        
+            <button id="autoFocusButton" class="btn btn-primary">Auto Focus</button>
             <div id="lensStatusMessage" class="status-message"></div>
         </div>
+
         <div id="videoControl" class="module">
             <h2>Video Control</h2>
-            
-            <div>
-                <label for="gainSlider">Gain (dB):</label>
-                <input type="range" id="gainSlider" min="0" max="30" step="2" value="0">
-                <span id="gainValue">0</span>
+            <div class="mb-3">
+                <label for="gainSlider" class="form-label">Gain (dB): <span id="gainValue">0</span></label>
+                <input type="range" class="form-range" id="gainSlider" min="0" max="36" step="2">
             </div>
-        
-            <div>
-                <label for="whiteBalanceSlider">White Balance (K):</label>
-                <input type="range" id="whiteBalanceSlider" min="2500" max="10000" step="100" value="5600">
-                <span id="whiteBalanceValue">5600</span>
+            <div class="mb-3">
+                <label for="whiteBalanceSlider" class="form-label">White Balance (K): <span id="whiteBalanceValue">5600</span></label>
+                <input type="range" class="form-range" id="whiteBalanceSlider" min="2500" max="10000" step="100">
             </div>
-        
-            <div>
-                <label for="tintSlider">Tint:</label>
-                <input type="range" id="tintSlider" min="-50" max="50" step="1" value="0">
-                <span id="tintValue">0</span>
+            <div class="mb-3">
+                <label for="tintSlider" class="form-label">Tint: <span id="tintValue">0</span></label>
+                <input type="range" class="form-range" id="tintSlider" min="-50" max="50" step="1">
             </div>
-        
-            <div>
-                <label for="shutterSlider">Shutter Speed (1/x sec):</label>
-                <input type="range" id="shutterSlider" min="24" max="2000" step="1" value="48">
-                <span id="shutterValue">48</span>
+            <div class="mb-3">
+                <label for="shutterSlider" class="form-label">Shutter Speed (1/x sec): <span id="shutterValue">48</span></label>
+                <input type="range" class="form-range" id="shutterSlider" min="24" max="2000" step="1">
             </div>
-        
-            <div>
-                <label for="autoExposureSelect">Auto Exposure Mode:</label>
-                <select id="autoExposureSelect">
+            <div class="mb-3">
+                <label for="autoExposureSelect" class="form-label">Auto Exposure Mode:</label>
+                <select id="autoExposureSelect" class="form-select">
                     <option value="Off">Off</option>
                     <option value="Continuous">Continuous</option>
                     <option value="OneShot">One Shot</option>
                 </select>
             </div>
-            <span id="autoExposureIndicator" style="display: none; color: green; margin-left: 10px;"></span>
-            <button id="autoWhiteBalanceButton">Auto White Balance</button>
-        
+            <button id="autoWhiteBalanceButton" class="btn btn-primary">Auto White Balance</button>
             <div id="videoStatusMessage" class="status-message"></div>
-        </div> </div>
+        </div>
+
         <div id="colorCorrection" class="module">
             <h2>Color Correction</h2>
-            <div id="colorCorrection" class="module">
-                <h2>Color Correction</h2>
-                <button id="resetAllColorCorrection">Reset All</button>
-                <!-- Rest of the color correction HTML remains the same -->
-            <div>
-                <h3>Lift</h3>
-                <div>
-                    <label for="liftRed">Red:</label>
-                    <input type="range" id="liftRed" min="-2" max="2" step="0.01" value="0">
-                    <span id="liftRedValue">0</span>
-                    <button class="resetButton" data-control="lift" data-key="red">Reset</button>
+            <button id="resetAllColorCorrection" class="btn btn-warning mb-3">Reset All</button>
+            
+            <ul class="nav nav-tabs mb-3" id="colorCorrectionTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="lift-tab" data-bs-toggle="tab" data-bs-target="#lift" type="button" role="tab" aria-controls="lift" aria-selected="true">Lift</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="gamma-tab" data-bs-toggle="tab" data-bs-target="#gamma" type="button" role="tab" aria-controls="gamma" aria-selected="false">Gamma</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="gain-tab" data-bs-toggle="tab" data-bs-target="#gain" type="button" role="tab" aria-controls="gain" aria-selected="false">Gain</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="offset-tab" data-bs-toggle="tab" data-bs-target="#offset" type="button" role="tab" aria-controls="offset" aria-selected="false">Offset</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="contrast-tab" data-bs-toggle="tab" data-bs-target="#contrast" type="button" role="tab" aria-controls="contrast" aria-selected="false">Contrast</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="color-tab" data-bs-toggle="tab" data-bs-target="#color" type="button" role="tab" aria-controls="color" aria-selected="false">Color</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="luma-tab" data-bs-toggle="tab" data-bs-target="#luma" type="button" role="tab" aria-controls="luma" aria-selected="false">Luma</button>
+                </li>
+            </ul>
+            
+            <div class="tab-content" id="colorCorrectionTabContent">
+                <div class="tab-pane fade show active" id="lift" role="tabpanel" aria-labelledby="lift-tab">
+                    <div class="mb-3">
+                        <label for="liftRed" class="form-label">Red: <span id="liftRedValue">0</span></label>
+                        <input type="range" class="form-range" id="liftRed" min="-1" max="1" step="0.01">
+                        <button class="btn btn-sm btn-outline-secondary resetButton" data-control="lift" data-key="red">Reset</button>
+                    </div>
+                    <div class="mb-3">
+                        <label for="liftGreen" class="form-label">Green: <span id="liftGreenValue">0</span></label>
+                        <input type="range" class="form-range" id="liftGreen" min="-1" max="1" step="0.01">
+                        <button class="btn btn-sm btn-outline-secondary resetButton" data-control="lift" data-key="green">Reset</button>
+                    </div>
+                    <div class="mb-3">
+                        <label for="liftBlue" class="form-label">Blue: <span id="liftBlueValue">0</span></label>
+                        <input type="range" class="form-range" id="liftBlue" min="-1" max="1" step="0.01">
+                        <button class="btn btn-sm btn-outline-secondary resetButton" data-control="lift" data-key="blue">Reset</button>
+                    </div>
+                    <div class="mb-3">
+                        <label for="liftLuma" class="form-label">Luma: <span id="liftLumaValue">0</span></label>
+                        <input type="range" class="form-range" id="liftLuma" min="-1" max="1" step="0.01">
+                        <button class="btn btn-sm btn-outline-secondary resetButton" data-control="lift" data-key="luma">Reset</button>
+                    </div>
                 </div>
-                <div>
-                    <label for="liftGreen">Green:</label>
-                    <input type="range" id="liftGreen" min="-2" max="2" step="0.01" value="0">
-                    <span id="liftGreenValue">0</span>
-                    <button class="resetButton" data-control="lift" data-key="green">Reset</button>
+                
+                <div class="tab-pane fade" id="gamma" role="tabpanel" aria-labelledby="gamma-tab">
+                    <div class="mb-3">
+                        <label for="gammaRed" class="form-label">Red: <span id="gammaRedValue">0</span></label>
+                        <input type="range" class="form-range" id="gammaRed" min="-1" max="1" step="0.01">
+                        <button class="btn btn-sm btn-outline-secondary resetButton" data-control="gamma" data-key="red">Reset</button>
+                    </div>
+                    <div class="mb-3">
+                        <label for="gammaGreen" class="form-label">Green: <span id="gammaGreenValue">0</span></label>
+                        <input type="range" class="form-range" id="gammaGreen" min="-1" max="1" step="0.01">
+                        <button class="btn btn-sm btn-outline-secondary resetButton" data-control="gamma" data-key="green">Reset</button>
+                    </div>
+                    <div class="mb-3">
+                        <label for="gammaBlue" class="form-label">Blue: <span id="gammaBlueValue">0</span></label>
+                        <input type="range" class="form-range" id="gammaBlue" min="-1" max="1" step="0.01">
+                        <button class="btn btn-sm btn-outline-secondary resetButton" data-control="gamma" data-key="blue">Reset</button>
+                    </div>
+                    <div class="mb-3">
+                        <label for="gammaLuma" class="form-label">Luma: <span id="gammaLumaValue">0</span></label>
+                        <input type="range" class="form-range" id="gammaLuma" min="-1" max="1" step="0.01">
+                        <button class="btn btn-sm btn-outline-secondary resetButton" data-control="gamma" data-key="luma">Reset</button>
+                    </div>
                 </div>
-                <div>
-                    <label for="liftBlue">Blue:</label>
-                    <input type="range" id="liftBlue" min="-2" max="2" step="0.01" value="0">
-                    <span id="liftBlueValue">0</span>
-                    <button class="resetButton" data-control="lift" data-key="blue">Reset</button>
+                
+                <div class="tab-pane fade" id="gain" role="tabpanel" aria-labelledby="gain-tab">
+                    <div class="mb-3">
+                        <label for="gainRed" class="form-label">Red: <span id="gainRedValue">1</span></label>
+                        <input type="range" class="form-range" id="gainRed" min="0" max="2" step="0.01">
+                        <button class="btn btn-sm btn-outline-secondary resetButton" data-control="gain" data-key="red">Reset</button>
+                    </div>
+                    <div class="mb-3">
+                        <label for="gainGreen" class="form-label">Green: <span id="gainGreenValue">1</span></label>
+                        <input type="range" class="form-range" id="gainGreen" min="0" max="2" step="0.01">
+                        <button class="btn btn-sm btn-outline-secondary resetButton" data-control="gain" data-key="green">Reset</button>
+                    </div>
+                    <div class="mb-3">
+                        <label for="gainBlue" class="form-label">Blue: <span id="gainBlueValue">1</span></label>
+                        <input type="range" class="form-range" id="gainBlue" min="0" max="2" step="0.01">
+                        <button class="btn btn-sm btn-outline-secondary resetButton" data-control="gain" data-key="blue">Reset</button>
+                    </div>
+                    <div class="mb-3">
+                        <label for="gainLuma" class="form-label">Luma: <span id="gainLumaValue">1</span></label>
+                        <input type="range" class="form-range" id="gainLuma" min="0" max="2" step="0.01">
+                        <button class="btn btn-sm btn-outline-secondary resetButton" data-control="gain" data-key="luma">Reset</button>
+                    </div>
                 </div>
-                <div>
-                    <label for="liftLuma">Luma:</label>
-                    <input type="range" id="liftLuma" min="-2" max="2" step="0.01" value="0">
-                    <span id="liftLumaValue">0</span>
-                    <button class="resetButton" data-control="lift" data-key="luma">Reset</button>
+                
+                <div class="tab-pane fade" id="offset" role="tabpanel" aria-labelledby="offset-tab">
+                    <div class="mb-3">
+                        <label for="offsetRed" class="form-label">Red: <span id="offsetRedValue">0</span></label>
+                        <input type="range" class="form-range" id="offsetRed" min="-1" max="1" step="0.01">
+                        <button class="btn btn-sm btn-outline-secondary resetButton" data-control="offset" data-key="red">Reset</button>
+                    </div>
+                    <div class="mb-3">
+                        <label for="offsetGreen" class="form-label">Green: <span id="offsetGreenValue">0</span></label>
+                        <input type="range" class="form-range" id="offsetGreen" min="-1" max="1" step="0.01">
+                        <button class="btn btn-sm btn-outline-secondary resetButton" data-control="offset" data-key="green">Reset</button>
+                    </div>
+                    <div class="mb-3">
+                        <label for="offsetBlue" class="form-label">Blue: <span id="offsetBlueValue">0</span></label>
+                        <input type="range" class="form-range" id="offsetBlue" min="-1" max="1" step="0.01">
+                        <button class="btn btn-sm btn-outline-secondary resetButton" data-control="offset" data-key="blue">Reset</button>
+                    </div>
+                    <div class="mb-3">
+                        <label for="offsetLuma" class="form-label">Luma: <span id="offsetLumaValue">0</span></label>
+                        <input type="range" class="form-range" id="offsetLuma" min="-1" max="1" step="0.01">
+                        <button class="btn btn-sm btn-outline-secondary resetButton" data-control="offset" data-key="luma">Reset</button>
+                    </div>
                 </div>
-            </div>
-        
-            <div>
-                <h3>Gamma</h3>
-                <div>
-                    <label for="gammaRed">Red:</label>
-                    <input type="range" id="gammaRed" min="-4" max="4" step="0.01" value="0">
-                    <span id="gammaRedValue">0</span>
-                    <button class="resetButton" data-control="gamma" data-key="red">Reset</button>
+                
+                <div class="tab-pane fade" id="contrast" role="tabpanel" aria-labelledby="contrast-tab">
+                    <div class="mb-3">
+                        <label for="contrastPivot" class="form-label">Pivot: <span id="contrastPivotValue">0.5</span></label>
+                        <input type="range" class="form-range" id="contrastPivot" min="0" max="1" step="0.01">
+                        <button class="btn btn-sm btn-outline-secondary resetButton" data-control="contrast" data-key="pivot">Reset</button>
+                    </div>
+                    <div class="mb-3">
+                        <label for="contrastAdjust" class="form-label">Adjust: <span id="contrastAdjustValue">1</span></label>
+                        <input type="range" class="form-range" id="contrastAdjust" min="0" max="2" step="0.01">
+                        <button class="btn btn-sm btn-outline-secondary resetButton" data-control="contrast" data-key="adjust">Reset</button>
+                    </div>
                 </div>
-                <div>
-                    <label for="gammaGreen">Green:</label>
-                    <input type="range" id="gammaGreen" min="-4" max="4" step="0.01" value="0">
-                    <span id="gammaGreenValue">0</span>
-                    <button class="resetButton" data-control="gamma" data-key="green">Reset</button>
+                
+                <div class="tab-pane fade" id="color" role="tabpanel" aria-labelledby="color-tab">
+                    <div class="mb-3">
+                        <label for="colorHue" class="form-label">Hue: <span id="colorHueValue">0</span></label>
+                        <input type="range" class="form-range" id="colorHue" min="-180" max="180" step="1">
+                        <button class="btn btn-sm btn-outline-secondary resetButton" data-control="color" data-key="hue">Reset</button>
+                    </div>
+                    <div class="mb-3">
+                        <label for="colorSaturation" class="form-label">Saturation: <span id="colorSaturationValue">1</span></label>
+                        <input type="range" class="form-range" id="colorSaturation" min="0" max="2" step="0.01">
+                        <button class="btn btn-sm btn-outline-secondary resetButton" data-control="color" data-key="saturation">Reset</button>
+                    </div>
                 </div>
-                <div>
-                    <label for="gammaBlue">Blue:</label>
-                    <input type="range" id="gammaBlue" min="-4" max="4" step="0.01" value="0">
-                    <span id="gammaBlueValue">0</span>
-                    <button class="resetButton" data-control="gamma" data-key="blue">Reset</button>
-                </div>
-                <div>
-                    <label for="gammaLuma">Luma:</label>
-                    <input type="range" id="gammaLuma" min="-4" max="4" step="0.01" value="0">
-                    <span id="gammaLumaValue">0</span>
-                    <button class="resetButton" data-control="gamma" data-key="luma">Reset</button>
-                </div>
-            </div>
-        
-            <div>
-                <h3>Gain</h3>
-                <div>
-                    <label for="gainRed">Red:</label>
-                    <input type="range" id="gainRed" min="0" max="16" step="0.01" value="1">
-                    <span id="gainRedValue">1</span>
-                    <button class="resetButton" data-control="gain" data-key="red">Reset</button>
-                </div>
-                <div>
-                    <label for="gainGreen">Green:</label>
-                    <input type="range" id="gainGreen" min="0" max="16" step="0.01" value="1">
-                    <span id="gainGreenValue">1</span>
-                    <button class="resetButton" data-control="gain" data-key="green">Reset</button>
-                </div>
-                <div>
-                    <label for="gainBlue">Blue:</label>
-                    <input type="range" id="gainBlue" min="0" max="16" step="0.01" value="1">
-                    <span id="gainBlueValue">1</span>
-                    <button class="resetButton" data-control="gain" data-key="blue">Reset</button>
-                </div>
-                <div>
-                    <label for="gainLuma">Luma:</label>
-                    <input type="range" id="gainLuma" min="0" max="16" step="0.01" value="1">
-                    <span id="gainLumaValue">1</span>
-                    <button class="resetButton" data-control="gain" data-key="luma">Reset</button>
-                </div>
-            </div>
-        
-            <div>
-                <h3>Offset</h3>
-                <div>
-                    <label for="offsetRed">Red:</label>
-                    <input type="range" id="offsetRed" min="-8" max="8" step="0.01" value="0">
-                    <span id="offsetRedValue">0</span>
-                    <button class="resetButton" data-control="offset" data-key="red">Reset</button>
-                </div>
-                <div>
-                    <label for="offsetGreen">Green:</label>
-                    <input type="range" id="offsetGreen" min="-8" max="8" step="0.01" value="0">
-                    <span id="offsetGreenValue">0</span>
-                    <button class="resetButton" data-control="offset" data-key="green">Reset</button>
-                </div>
-                <div>
-                    <label for="offsetBlue">Blue:</label>
-                    <input type="range" id="offsetBlue" min="-8" max="8" step="0.01" value="0">
-                    <span id="offsetBlueValue">0</span>
-                    <button class="resetButton" data-control="offset" data-key="blue">Reset</button>
-                </div>
-                <div>
-                    <label for="offsetLuma">Luma:</label>
-                    <input type="range" id="offsetLuma" min="-8" max="8" step="0.01" value="0">
-                    <span id="offsetLumaValue">0</span>
-                    <button class="resetButton" data-control="offset" data-key="luma">Reset</button>
-                </div>
-            </div>
-        
-            <div>
-                <h3>Contrast</h3>
-                <div>
-                    <label for="contrastPivot">Pivot:</label>
-                    <input type="range" id="contrastPivot" min="0" max="1" step="0.01" value="0.5">
-                    <span id="contrastPivotValue">0.5</span>
-                    <button class="resetButton" data-control="contrast" data-key="pivot">Reset</button>
-                </div>
-                <div>
-                    <label for="contrastAdjust">Adjust:</label>
-                    <input type="range" id="contrastAdjust" min="0" max="2" step="0.01" value="1">
-                    <span id="contrastAdjustValue">1</span>
-                    <button class="resetButton" data-control="contrast" data-key="adjust">Reset</button>
-                </div>
-            </div>
-        
-            <div>
-                <h3>Color</h3>
-                <div>
-                    <label for="colorHue">Hue:</label>
-                    <input type="range" id="colorHue" min="-1" max="1" step="0.01" value="0">
-                    <span id="colorHueValue">0</span>
-                    <button class="resetButton" data-control="color" data-key="hue">Reset</button>
-                </div>
-                <div>
-                    <label for="colorSaturation">Saturation:</label>
-                    <input type="range" id="colorSaturation" min="0" max="2" step="0.01" value="1">
-                    <span id="colorSaturationValue">1</span>
-                    <button class="resetButton" data-control="color" data-key="saturation">Reset</button>
-                </div>
-            </div>
-        
-            <div>
-                <h3>Luma Contribution</h3>
-                <div>
-                    <label for="lumaContributionLumaContribution">Luma Contribution:</label>
-                    <input type="range" id="lumaContributionLumaContribution" min="0" max="1" step="0.01" value="1">
-                    <span id="lumaContributionLumaContributionValue">1</span>
-                    <button class="resetButton" data-control="lumaContribution" data-key="lumaContribution">Reset</button>
+                
+                <div class="tab-pane fade" id="luma" role="tabpanel" aria-labelledby="luma-tab">
+                    <div class="mb-3">
+                        <label for="lumaContributionLumaContribution" class="form-label">Luma Contribution: <span id="lumaContributionLumaContributionValue">1</span></label>
+                        <input type="range" class="form-range" id="lumaContributionLumaContribution" min="0" max="1" step="0.01">
+                        <button class="btn btn-sm btn-outline-secondary resetButton" data-control="lumaContribution" data-key="lumaContribution">Reset</button>
+                    </div>
                 </div>
             </div>
-        
             <div id="colorStatusMessage" class="status-message"></div>
-        </div></div>
+        </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

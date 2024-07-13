@@ -48,7 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // System Control Module
 function initializeSystemControl() {
-    const getSystemInfoButton = document.getElementById('getSystemInfo');
     const systemInfoDiv = document.getElementById('systemInfo');
     const codecFormatSpan = document.getElementById('codecFormat');
     const frameRateSelect = document.getElementById('frameRate');
@@ -80,8 +79,9 @@ function initializeSystemControl() {
             select.appendChild(optionElement);
         });
     }
+
     function showStatusMessage(message, isError = false) {
-        const statusMessageDiv = document.getElementById('statusMessage');
+        const statusMessageDiv = document.getElementById('systemStatusMessage');
         if (!statusMessageDiv) {
             console.error('Status message div not found');
             return;
@@ -91,7 +91,7 @@ function initializeSystemControl() {
         statusMessageDiv.style.display = 'block';
         statusMessageDiv.style.opacity = '1';
     
-        console.log('Showing status message:', message);  // Debug log
+        console.log('Showing status message:', message);
     
         setTimeout(() => {
             statusMessageDiv.style.opacity = '0';
@@ -100,35 +100,54 @@ function initializeSystemControl() {
             }, 500);
         }, 3000);
     }
-    
-    getSystemInfoButton.addEventListener('click', async () => {
-        console.log('Get Current System Info button clicked');
+
+    async function fetchAndPopulateSystemInfo() {
+        console.log('Fetching system info');
         try {
-            const { supportedFormats } = await getSystemInfo();
+            const [supportedFormatsResponse, currentFormatResponse] = await Promise.all([
+                makeApiCall('/system/supportedFormats', 'GET'),
+                makeApiCall('/system/format', 'GET')
+            ]);
+    
+            const supportedFormats = supportedFormatsResponse.supportedFormats;
+            const currentFormat = currentFormatResponse;
+    
             console.log('Retrieved supported formats:', supportedFormats);
-
-           systemInfoDiv.innerHTML = `<pre>${JSON.stringify(supportedFormats, null, 2)}</pre>`;
-
-            const format = supportedFormats.supportedFormats[0];
-
+            console.log('Retrieved current format:', currentFormat);
+    
+            // systemInfoDiv.innerHTML = `<pre>${JSON.stringify(supportedFormats, null, 2)}</pre>`;
+    
+            const format = supportedFormats[0];
+    
             // Display codec format
-            codecFormatSpan.textContent = format.codecs[0];
-
+            codecFormatSpan.textContent = currentFormat.codec || format.codecs[0];
+    
             // Populate frame rate dropdown
             populateSelect(frameRateSelect, format.frameRates);
-
+    
+            // Set the current frame rate as selected
+            if (currentFormat.frameRate) {
+                frameRateSelect.value = currentFormat.frameRate;
+            }
+    
             // Set up off-speed frame rate controls
             offSpeedFrameRateSlider.min = format.minOffSpeedFrameRate;
             offSpeedFrameRateSlider.max = format.maxOffSpeedFrameRate;
-            offSpeedFrameRateSlider.value = format.frameRates[0];
+            offSpeedFrameRateSlider.value = currentFormat.offSpeedFrameRate || format.frameRates[0];
             offSpeedFrameRateValue.textContent = offSpeedFrameRateSlider.value;
-
+    
+            // Set the off-speed checkbox based on current format
+            offSpeedEnabledCheckbox.checked = currentFormat.offSpeedEnabled || false;
+            offSpeedControls.style.display = offSpeedEnabledCheckbox.checked ? 'block' : 'none';
+    
             console.log('UI elements populated successfully');
+            showStatusMessage('System information loaded successfully');
         } catch (error) {
-            console.error('Error in button click handler:', error);
+            console.error('Error fetching system info:', error);
             systemInfoDiv.innerHTML = 'Failed to retrieve system information. Check console for details.';
+            showStatusMessage('Failed to load system information', true);
         }
-    });
+    }
 
     offSpeedEnabledCheckbox.addEventListener('change', () => {
         offSpeedControls.style.display = offSpeedEnabledCheckbox.checked ? 'block' : 'none';
@@ -160,27 +179,17 @@ function initializeSystemControl() {
             console.log('Update response:', response);
     
             showStatusMessage('System settings updated successfully');
-            console.log('Status message should be visible now');  // Debug log
+            console.log('Status message should be visible now');
     
         } catch (error) {
             console.error('Failed to update system settings:', error);
             showStatusMessage(`Failed to update system settings: ${error.message}`, true);
         }
     });
-    
 
-    getSystemInfoButton.addEventListener('click', async () => {
-        try {
-            const systemInfo = await makeApiCall('/system', 'GET');
-            systemInfoDiv.innerHTML = `
-                <p>Current Video Format: ${systemInfo.videoFormat.name}</p>
-                <p>Current Codec: ${systemInfo.codecFormat.codec}</p>
-            `;
-        } catch (error) {
-            systemInfoDiv.innerHTML = 'Failed to retrieve system information';
-        }
-    });}
-
+    // Fetch system info immediately when the module initializes
+    fetchAndPopulateSystemInfo();
+}
 
 // Preset Control Module
 
@@ -211,34 +220,28 @@ function initializePresetControl() {
             try {
                 const presets = await makeApiCall('/presets', 'GET');
                 console.log('Fetched presets:', presets);
+                const presetList = document.getElementById('presetList');
                 presetList.innerHTML = '';
-                presets.presets.forEach(preset => {
+                if (presets.presets && presets.presets.length > 0) {
+                    presets.presets.forEach(preset => {
+                        const option = document.createElement('option');
+                        option.value = preset;
+                        option.textContent = preset;
+                        presetList.appendChild(option);
+                    });
+                    showStatusMessage('Presets loaded successfully');
+                } else {
                     const option = document.createElement('option');
-                    option.value = preset;
-                    option.textContent = preset;
+                    option.value = '';
+                    option.textContent = 'No presets found';
                     presetList.appendChild(option);
-                });
+                    showStatusMessage('No presets found', true);
+                }
             } catch (error) {
                 console.error('Failed to fetch presets:', error);
                 showStatusMessage('Failed to fetch presets', true);
             }
         }
-
-        loadPresetButton.addEventListener('click', async () => {
-            const selectedPreset = presetList.value;
-            if (!selectedPreset) {
-                showStatusMessage('Please select a preset', true);
-                return;
-            }
-            try {
-                await makeApiCall('/presets/active', 'PUT', { preset: selectedPreset });
-                console.log('Preset loaded:', selectedPreset);
-                showStatusMessage(`Preset "${selectedPreset}" loaded successfully`);
-            } catch (error) {
-                console.error('Failed to load preset:', error);
-                showStatusMessage('Failed to load preset', true);
-            }
-        });
     
         //commented out save and delete functionality due to CORS issue 
         /*
@@ -304,17 +307,24 @@ function initializeAudioControl() {
     ];
 
     function showStatusMessage(message, isError = false) {
-        statusMessageDiv.textContent = message;
-        statusMessageDiv.className = 'status-message ' + (isError ? 'status-error' : 'status-success');
-        statusMessageDiv.style.display = 'block';
-        statusMessageDiv.style.opacity = '1';
-
-        setTimeout(() => {
-            statusMessageDiv.style.opacity = '0';
+        const statusMessageDiv = document.getElementById('audioStatusMessage');
+        if (statusMessageDiv) {
+            statusMessageDiv.textContent = message;
+            statusMessageDiv.className = 'status-message ' + (isError ? 'status-error' : 'status-success');
+            statusMessageDiv.style.display = 'block';
+            statusMessageDiv.style.opacity = '1';
+    
+            console.log(`Audio Control: ${message}`);
+    
             setTimeout(() => {
-                statusMessageDiv.style.display = 'none';
-            }, 500);
-        }, 3000);
+                statusMessageDiv.style.opacity = '0';
+                setTimeout(() => {
+                    statusMessageDiv.style.display = 'none';
+                }, 500);
+            }, 3000);
+        } else {
+            console.warn('Audio status message element not found');
+        }
     }
 
     function updateSourceOptions() {
@@ -738,19 +748,24 @@ function initializeVideoControl() {
     const UPDATE_DELAY = 200; // milliseconds
 
     function showVideoStatusMessage(message, isError = false) {
-        videoStatusMessageDiv.textContent = message;
-        videoStatusMessageDiv.className = 'status-message ' + (isError ? 'status-error' : 'status-success');
-        videoStatusMessageDiv.style.display = 'block';
-        videoStatusMessageDiv.style.opacity = '1';
-
-        console.log(`Video Control: ${message}`);
-
-        setTimeout(() => {
-            videoStatusMessageDiv.style.opacity = '0';
+        const videoStatusMessageDiv = document.getElementById('videoStatusMessage');
+        if (videoStatusMessageDiv) {
+            videoStatusMessageDiv.textContent = message;
+            videoStatusMessageDiv.className = 'status-message ' + (isError ? 'status-error' : 'status-success');
+            videoStatusMessageDiv.style.display = 'block';
+            videoStatusMessageDiv.style.opacity = '1';
+    
+            console.log(`Video Control: ${message}`);
+    
             setTimeout(() => {
-                videoStatusMessageDiv.style.display = 'none';
-            }, 500);
-        }, 3000);
+                videoStatusMessageDiv.style.opacity = '0';
+                setTimeout(() => {
+                    videoStatusMessageDiv.style.display = 'none';
+                }, 500);
+            }, 3000);
+        } else {
+            console.warn('Video status message element not found');
+        }
     }
 
     function updateSliderValue(slider, valueElement, value) {

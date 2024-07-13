@@ -158,7 +158,14 @@
 <body>
     <div class="container">
         <h1 class="text-center mb-4">Blackmagic Micro Studio Camera 4K G2 Control</h1>
-
+        <div id="ipAddressSection" class="module mb-4">
+            <h2>Device IP Address</h2>
+            <div class="input-group mb-3">
+                <input type="text" id="ipAddressInput" class="form-control" placeholder="Enter IP Address" aria-label="IP Address">
+                <button class="btn btn-primary" type="button" id="validateIPButton">Validate</button>
+            </div>
+            <div id="ipStatusMessage" class="status-message"></div>
+        </div>
         <div id="systemControl" class="module">
             <h2>System Control</h2>
            <!-- <button id="getSystemInfo" class="btn btn-primary mb-3">Get Current System Info</button>-->

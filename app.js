@@ -1,6 +1,5 @@
 // Configuration
-const API_BASE_URL = 'http://10.14.80.48/control/api/v1';
-
+let API_BASE_URL = '';
 // Utility function for making API calls
 async function makeApiCall(endpoint, method = 'GET', data = null) {
     const url = `${API_BASE_URL}${endpoint}`;
@@ -36,14 +35,78 @@ async function makeApiCall(endpoint, method = 'GET', data = null) {
     }
 }
 
+// IP Address validation and module initialization
+let modulesInitialized = false;
+
+function showIPStatusMessage(message, isError = false) {
+    const statusMessageDiv = document.getElementById('ipStatusMessage');
+    statusMessageDiv.textContent = message;
+    statusMessageDiv.className = 'status-message ' + (isError ? 'status-error' : 'status-success');
+    statusMessageDiv.style.display = 'block';
+}
+
+async function validateIPAddress() {
+    const ipAddress = document.getElementById('ipAddressInput').value.trim();
+    if (!ipAddress) {
+        showIPStatusMessage('Please enter an IP address', true);
+        return;
+    }
+
+    const testUrl = `http://${ipAddress}/control/api/v1/system/supportedFormats`;
+    
+    try {
+        const response = await fetch(testUrl);
+        if (response.ok) {
+            API_BASE_URL = `http://${ipAddress}/control/api/v1`;
+            showIPStatusMessage('IP address validated successfully');
+            document.getElementById('ipAddressSection').style.display = 'none';
+            showModules();
+            initializeModules();
+        } else {
+            showIPStatusMessage('Invalid IP address or device not compatible', true);
+        }
+    } catch (error) {
+        showIPStatusMessage('Error validating IP address: ' + error.message, true);
+    }
+}
+
+function showModules() {
+    document.querySelectorAll('.module:not(#ipAddressSection)').forEach(module => {
+        module.style.display = 'block';
+    });
+}
+
+function initializeModules() {
+    if (!modulesInitialized) {
+        initializeSystemControl();
+        initializePresetControl();
+        initializeAudioControl();
+        initializeLensControl();
+        initializeVideoControl();
+        initializeColorCorrection();
+        modulesInitialized = true;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const validateIPButton = document.getElementById('validateIPButton');
+    validateIPButton.addEventListener('click', validateIPAddress);
+
+    // Hide all modules initially
+    document.querySelectorAll('.module:not(#ipAddressSection)').forEach(module => {
+        module.style.display = 'none';
+    });
+});
+
 // Event listener for when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
-    initializeSystemControl();
-    initializePresetControl();
-    initializeAudioControl();
-    initializeLensControl();
-    initializeVideoControl();
-    initializeColorCorrection();
+    const validateIPButton = document.getElementById('validateIPButton');
+    validateIPButton.addEventListener('click', validateIPAddress);
+
+    // Hide all modules initially
+    document.querySelectorAll('.module:not(#ipAddressSection)').forEach(module => {
+        module.style.display = 'none';
+    });
 });
 
 // System Control Module

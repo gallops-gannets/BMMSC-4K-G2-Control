@@ -1,5 +1,52 @@
 // Configuration
 let API_BASE_URL = '';
+
+let isDemoMode = false;
+
+// Mock data for demo mode
+const mockData = {
+    systemInfo: {
+        supportedFormats: [{
+            codecs: ['BRAW'],
+            frameRates: ['23.98', '24', '25', '29.97', '30', '50', '59.94', '60'],
+            minOffSpeedFrameRate: 1,
+            maxOffSpeedFrameRate: 60
+        }]
+    },
+    currentFormat: {
+        codec: 'BRAW',
+        frameRate: '24',
+        offSpeedEnabled: false,
+        offSpeedFrameRate: 24
+    },
+    presets: ['Preset 1', 'Preset 2', 'Preset 3'],
+    audio: {
+        channel1: { input: 'Camera - Left', level: { normalised: 0.5 } },
+        channel2: { input: 'Camera - Right', level: { normalised: 0.5 } }
+    },
+    lens: {
+        iris: { apertureStop: 5.6 },
+        zoom: { normalised: 0.5 },
+        focus: { normalised: 0.5 }
+    },
+    video: {
+        gain: { gain: 0 },
+        whiteBalance: { whiteBalance: 5600 },
+        whiteBalanceTint: { whiteBalanceTint: 0 },
+        shutter: { shutterSpeed: 48 },
+        autoExposure: { mode: { mode: 'Off' } }
+    },
+    colorCorrection: {
+        lift: { red: 0, green: 0, blue: 0, luma: 0 },
+        gamma: { red: 0, green: 0, blue: 0, luma: 0 },
+        gain: { red: 1, green: 1, blue: 1, luma: 1 },
+        offset: { red: 0, green: 0, blue: 0, luma: 0 },
+        contrast: { pivot: 0.5, adjust: 1 },
+        color: { hue: 0, saturation: 1 },
+        lumaContribution: { lumaContribution: 1 }
+    }
+};
+
 // Utility function for making API calls
 async function makeApiCall(endpoint, method = 'GET', data = null) {
     const url = `${API_BASE_URL}${endpoint}`;
@@ -91,6 +138,16 @@ function initializeModules() {
 document.addEventListener('DOMContentLoaded', () => {
     const validateIPButton = document.getElementById('validateIPButton');
     validateIPButton.addEventListener('click', validateIPAddress);
+
+    const demoModeButton = document.getElementById('demoModeButton');
+    demoModeButton.addEventListener('click', () => {
+        isDemoMode = true;
+        API_BASE_URL = 'http://demo.example.com'; // Set a dummy URL
+        showIPStatusMessage('Demo mode activated');
+        document.getElementById('ipAddressSection').style.display = 'none';
+        showModules();
+        initializeModules();
+    });
 
     // Hide all modules initially
     document.querySelectorAll('.module:not(#ipAddressSection)').forEach(module => {

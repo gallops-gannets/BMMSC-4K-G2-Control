@@ -147,6 +147,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('ipAddressSection').style.display = 'none';
         showModules();
         initializeModules();
+    const backButton = document.getElementById('backButton');
+    backButton.addEventListener('click', () => {
+        location.reload();
+        });
     });
 
     // Hide all modules initially

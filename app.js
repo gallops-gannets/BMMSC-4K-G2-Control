@@ -81,7 +81,53 @@ async function makeApiCall(endpoint, method = 'GET', data = null) {
         throw error;
     }
 }
+function createBackButton() {
+    const backButton = document.createElement('button');
+    backButton.id = 'backButton';
+    backButton.textContent = '↩ Back';
+    backButton.style.cssText = `
+        display: inline-block;
+        margin-right: 15px;
+        padding: 5px 10px;
+        background-color: #2c2c2c;
+        color: #ffffff;
+        border: 1px solid #444444;
+        border-radius: 4px;
+        cursor: pointer;
+        vertical-align: middle;
+        font-size: 14px;
+        transition: background-color 0.3s, border-color 0.3s;
+    `;
+    backButton.addEventListener('click', () => {
+        location.reload();
+    });
+    backButton.addEventListener('mouseover', () => {
+        backButton.style.backgroundColor = '#3a3a3a';
+        backButton.style.borderColor = '#555555';
+    });
+    backButton.addEventListener('mouseout', () => {
+        backButton.style.backgroundColor = '#2c2c2c';
+        backButton.style.borderColor = '#444444';
+    });
 
+    const title = document.querySelector('h1');
+    const titleContainer = document.createElement('div');
+    titleContainer.style.cssText = `
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-top: 60px;
+        padding-bottom: 20px;
+    `;
+    
+    title.parentNode.insertBefore(titleContainer, title);
+    titleContainer.appendChild(backButton);
+    titleContainer.appendChild(title);
+    
+    // Adjust title styles
+    title.style.margin = '0';
+    title.style.display = 'inline-block';
+}
 // IP Address validation and module initialization
 let modulesInitialized = false;
 
@@ -108,6 +154,7 @@ async function validateIPAddress() {
             showIPStatusMessage('IP address validated successfully');
             document.getElementById('ipAddressSection').style.display = 'none';
             showModules();
+            console.log('showModules called');
             initializeModules();
         } else {
             showIPStatusMessage('Invalid IP address or device not compatible', true);
@@ -121,6 +168,8 @@ function showModules() {
     document.querySelectorAll('.module:not(#ipAddressSection)').forEach(module => {
         module.style.display = 'block';
     });
+    createBackButton();
+    console.log('Modules shown and back button created');
 }
 
 function initializeModules() {

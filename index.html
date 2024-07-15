@@ -228,16 +228,22 @@
     <!-- <button id="backButton" style="position: absolute; top: 10px; left: 10px;">↩ Back</button> -->
     <div class="container">
         <div style="position: relative; padding-top: 60px;">
-            <h1 id="blackmagic-micro-studio-camera-4k-g2-control" class="text-center mb-4">Blackmagic Micro Studio Camera 4K G2 Control</h1>
-        <div id="ipAddressSection" class="module mb-4">
-            <h2>Device IP Address</h2>
-            <div class="input-group mb-3">
-                <input type="text" id="ipAddressInput" class="form-control" placeholder="Enter IP address">
-                <button id="validateIPButton" class="btn btn-primary">Validate</button>
-                <button id="demoModeButton" class="btn btn-secondary">Demo Mode</button>
+            <h1 id="blackmagic-micro-studio-camera-4k-g2-control" class="text-center mb-4">BMMSC 4K G2 Control v0.2.1</h1>
+            <div id="ipAddressSection" class="module mb-4">
+                <h2>Device IP Address</h2>
+                <div class="mb-3">
+                    <input type="text" id="ipAddressInput" class="form-control" placeholder="Enter IP Address">
+                </div>
+                <div class="row">
+                    <div class="col-12 col-md-6 mb-2 mb-md-0">
+                        <button id="validateIPButton" class="btn btn-primary w-100">Validate</button>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <button id="demoModeButton" class="btn btn-secondary w-100">Demo Mode</button>
+                    </div>
+                </div>
+                <div id="ipStatusMessage" class="status-message mt-3"></div>
             </div>
-            <div id="ipStatusMessage" class="status-message"></div>
-        </div>
         <div id="systemControl" class="module">
             <h2>System Control</h2>
            <!-- <button id="getSystemInfo" class="btn btn-primary mb-3">Get Current System Info</button>-->

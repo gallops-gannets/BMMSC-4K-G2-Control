@@ -131,6 +131,12 @@ function createBackButton() {
 // IP Address validation and module initialization
 let modulesInitialized = false;
 
+function toggleModule(moduleId) {
+    const moduleContent = document.querySelector(`#${moduleId} .module-content`);
+    const toggleIcon = document.querySelector(`#${moduleId} .toggle-icon`);
+    moduleContent.classList.toggle('show');
+    toggleIcon.textContent = moduleContent.classList.contains('show') ? '▲' : '▼';
+}
 function showIPStatusMessage(message, isError = false) {
     const statusMessageDiv = document.getElementById('ipStatusMessage');
     statusMessageDiv.textContent = message;

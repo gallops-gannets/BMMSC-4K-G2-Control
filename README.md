@@ -12,13 +12,11 @@ As of time of writing, the app has the ability to:
 - allow the user to select presets (CORS problems we haven't figured out yet are keeping us from saving new presets),
 - change the audio sources and levels (specifying the mic mode and 3.5mm mode, though abstractions, allows us to avoid various unsupported combinations of mono and single channel stereo sources that the camera did not seem to like.)
 - control the aperture and indicate if it is being controlled by auto exposure, control the focus, control zoom if a zoom lens is detected, and execute an autofocus
-- modify the gain, white balance, tint and shutter speed, as well as triggering an auto white balance. auto exposure mode isn't working yet.
+- modify the gain, white balance, tint and shutter speed, as well as triggering an auto white balance. shutter speed is also indicated if in auto. switching auto exposure mode does not seem to be compatible with this camera. 
 - color correction is also supported, providing a variety of color controls that each or all can be reset to factory defaults.
 
 ## Goals
-Down the road, we will work on making these modules foldable, as well as providing a user-facing way to specify and perhaps verify the IP address of the camera. 
-
-Testing and adapting this control panel to different platforms is also in the future.
+Down the road, I'd like this interface to allow the modules to adapt to a 3x2 grid in landscape mode for devices like tablets. I also envision glowing colored borders around each moduke that serve in realtime as a communications status indicator as well as a health and setting parity feature for each module.  
 
 ## Requirements
-This app requires the G2 to be connected via Ethernet over USB-C to a network. I have had success with a combination USB3 - Ethernet dongle. As of now, there is no easy way to change the IP address of the camera - it is set to 10.14.80.48 and this value would need to be changed in the code for other cameras to be functional. Obviously we are working on this. 
+This app requires the G2 to be connected via Ethernet over USB-C to a network. I have had success with a combination USB3 - Ethernet dongle. 

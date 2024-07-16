@@ -1236,7 +1236,19 @@ function initializeVideoControl() {
     const autoExposureSelect = document.getElementById('autoExposureSelect');
     const autoWhiteBalanceButton = document.getElementById('autoWhiteBalanceButton');
     const videoStatusMessageDiv = document.getElementById('videoStatusMessage');
-
+    function setShutterAutoExposure(isAutoExposure) {
+        if (isAutoExposure) {
+            shutterSlider.disabled = true;
+            shutterSlider.classList.add('auto-exposure');
+            shutterValue.classList.add('auto-exposure');
+            shutterValue.textContent += ' (Auto)';
+        } else {
+            shutterSlider.disabled = false;
+            shutterSlider.classList.remove('auto-exposure');
+            shutterValue.classList.remove('auto-exposure');
+            shutterValue.textContent = shutterValue.textContent.replace(' (Auto)', '');
+        }
+    }
     let updateTimeout = null;
     const UPDATE_DELAY = 200; // milliseconds
 
@@ -1366,13 +1378,25 @@ function initializeVideoControl() {
 
             autoExposureSelect.value = autoExposureResponse.mode.mode;
 
+            // Check if shutter is under auto exposure control
+            if (autoExposureResponse.mode && autoExposureResponse.mode.mode !== 'Off') {
+                setShutterAutoExposure(true);
+            } else {
+                setShutterAutoExposure(false);
+            }
+
             showVideoStatusMessage('Video settings loaded');
         } catch (error) {
             console.error('Failed to fetch video settings:', error);
             showVideoStatusMessage('Failed to fetch video settings', true);
         }
     }
-
+    autoExposureSelect.addEventListener('change', async () => {
+        const isAutoExposure = autoExposureSelect.value !== 'Off';
+        setShutterAutoExposure(isAutoExposure);
+        await updateVideoSettings('autoExposure', { mode: autoExposureSelect.value });
+    });
+    
     // Initial fetch of video settings
     fetchVideoSettings();
 }

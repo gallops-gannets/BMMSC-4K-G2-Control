@@ -159,6 +159,18 @@
     transition: max-height 0.3s ease-in, opacity 0.3s ease-in;
     opacity: 1;
 }
+#shutterSlider.auto-exposure,
+#shutterValue.auto-exposure {
+    opacity: 0.5;
+}
+
+#shutterSlider.auto-exposure::-webkit-slider-thumb {
+    background: #888;
+}
+
+#shutterSlider.auto-exposure::-moz-range-thumb {
+    background: #888;
+}
     </style>
 </head>
 <body>
@@ -341,16 +353,16 @@
                 </div>
                 <div class="mb-3">
                     Shutter Speed (1/x sec): <span id="shutterValue">48</span>
-                    <input type="range" class="form-range" id="shutterSlider" min="24" max="2000" step="1">
+                    <input type="range" id="shutterSlider" min="24" max="2000" step="1" value="48">
                 </div>
-                <div class="mb-3">
+                <!-- <div class="mb-3">
                     Auto Exposure Mode:
                     <select id="autoExposureSelect" class="form-select">
                         <option value="Off">Off</option>
                         <option value="Continuous">Continuous</option>
                         <option value="OneShot">One Shot</option>
                     </select>
-                </div>
+                </div> -->
                 <button id="autoWhiteBalanceButton" class="btn btn-primary">Auto White Balance</button>
                 <div id="videoStatusMessage" class="status-message"></div>
             </div>

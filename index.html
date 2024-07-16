@@ -317,7 +317,31 @@
                 <div id="videoStatusMessage" class="status-message"></div>
             </div>
         </div>
-
+        <div id="transportControl" class="module">
+            <div class="module-header" onclick="toggleModule('transportControl')">
+                <h2>Transport Control</h2>
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div class="module-content">
+                <div class="mb-3">
+                    <button id="recordButton" class="btn btn-danger">Start Recording</button>
+                    <span id="recordingStatusIndicator" class="ml-2">⚪</span>
+                </div>
+                <div class="mb-3">
+                    <label for="clipName">Clip Name:</label>
+                    <input type="text" id="clipName" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label>Timecode:</label>
+                    <span id="timecodeDisplay"></span>
+                    <select id="timecodeSource" class="form-control mt-2">
+                        <option value="timecode">Time of Day</option>
+                        <option value="clip">Clip Position</option>
+                    </select>
+                </div>
+                <div id="transportStatusMessage" class="status-message"></div>
+            </div>
+        </div>
         <div id="colorCorrection" class="module">
             <div class="module-header" onclick="toggleModule('colorCorrection')">
                 <h2>Color Correction</h2>

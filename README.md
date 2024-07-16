@@ -20,3 +20,5 @@ Down the road, I'd like this interface to allow the modules to adapt to a 3x2 gr
 
 ## Requirements
 This app requires the G2 to be connected via Ethernet over USB-C to a network. I have had success with a combination USB3 - Ethernet dongle. 
+
+As of now, this app runs in desktop web browsers and iOS via CapacitorJS. It is not yet on the App Store. 

@@ -1089,9 +1089,10 @@ function initializeTransportControl() {
     async function fastStatusCheck() {
         try {
             const response = await makeApiCall('/transports/0/record', 'GET');
-            updateRecordingStatusIndicator(response.recording);
             
+            // Only update the indicator if the state has actually changed
             if (response.recording !== isRecording) {
+                updateRecordingStatusIndicator(response.recording);
                 isRecording = response.recording;
                 updateRecordButtonState();
                 showTransportStatusMessage(isRecording ? 'Recording started on camera' : 'Recording stopped on camera');
@@ -1209,7 +1210,7 @@ function initializeTransportControl() {
         // Immediate visual feedback
         recordButton.disabled = true;
         recordButton.textContent = expectedState ? 'Starting Recording...' : 'Stopping Recording...';
-        updateRecordingStatusIndicator(expectedState); // Add this line
+        // Remove the updateRecordingStatusIndicator call from here
         showTransportStatusMessage('Updating recording state...', false);
     
         try {
@@ -1218,14 +1219,15 @@ function initializeTransportControl() {
             // Check status more frequently
             for (let i = 0; i < 10; i++) {
                 await new Promise(resolve => setTimeout(resolve, 200)); // Wait 200ms
-                const actualRecordingState = await verifyRecordingState();
+                const response = await makeApiCall('/transports/0/record', 'GET');
                 
-                if (actualRecordingState === expectedState) {
-                    isRecording = actualRecordingState;
+                if (response.recording === expectedState) {
+                    isRecording = response.recording;
                     updateRecordButtonState();
+                    updateRecordingStatusIndicator(isRecording); // Move this here
                     showTransportStatusMessage(isRecording ? 'Recording started' : 'Recording stopped');
                     if (isRecording) {
-                        clipNameInput.value = '';
+                        clipNameInput.value = response.clipName || '';
                     }
                     return; // Exit the function once the state is confirmed
                 }

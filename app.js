@@ -1233,7 +1233,7 @@ function initializeVideoControl() {
     const tintValue = document.getElementById('tintValue');
     const shutterSlider = document.getElementById('shutterSlider');
     const shutterValue = document.getElementById('shutterValue');
-    const autoExposureSelect = document.getElementById('autoExposureSelect');
+    // const autoExposureSelect = document.getElementById('autoExposureSelect');
     const autoWhiteBalanceButton = document.getElementById('autoWhiteBalanceButton');
     const videoStatusMessageDiv = document.getElementById('videoStatusMessage');
 
@@ -1324,9 +1324,9 @@ function initializeVideoControl() {
         debouncedUpdate('shutter', shutterSlider.value);
     });
 
-    autoExposureSelect.addEventListener('change', () => {
-        debouncedUpdate('autoExposure', autoExposureSelect.value);
-    });
+    // autoExposureSelect.addEventListener('change', () => {
+    //     debouncedUpdate('autoExposure', autoExposureSelect.value);
+    // });
 
     autoWhiteBalanceButton.addEventListener('click', async () => {
         console.log('Triggering auto white balance...');
@@ -1363,8 +1363,10 @@ function initializeVideoControl() {
             updateSliderValue(whiteBalanceSlider, whiteBalanceValue, whiteBalanceResponse.whiteBalance);
             updateSliderValue(tintSlider, tintValue, tintResponse.whiteBalanceTint);
             updateSliderValue(shutterSlider, shutterValue, shutterResponse.shutterSpeed || shutterResponse.shutterAngle);
+            
+            setShutterAutoExposure(autoExposureResponse.mode.mode !== 'Off');
 
-            autoExposureSelect.value = autoExposureResponse.mode.mode;
+            // autoExposureSelect.value = autoExposureResponse.mode.mode;
 
             showVideoStatusMessage('Video settings loaded');
         } catch (error) {
@@ -1372,7 +1374,19 @@ function initializeVideoControl() {
             showVideoStatusMessage('Failed to fetch video settings', true);
         }
     }
-
+    function setShutterAutoExposure(isAutoExposure) {
+        if (isAutoExposure) {
+            shutterSlider.disabled = true;
+            shutterSlider.classList.add('auto-exposure');
+            shutterValue.classList.add('auto-exposure');
+            shutterValue.textContent += ' (Auto)';
+        } else {
+            shutterSlider.disabled = false;
+            shutterSlider.classList.remove('auto-exposure');
+            shutterValue.classList.remove('auto-exposure');
+            shutterValue.textContent = shutterValue.textContent.replace(' (Auto)', '');
+        }
+    }
     // Initial fetch of video settings
     fetchVideoSettings();
 }

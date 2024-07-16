@@ -116,7 +116,6 @@ function createBackButton() {
         display: flex;
         align-items: center;
         justify-content: center;
-        padding-top: 60px;
         padding-bottom: 20px;
     `;
     
@@ -127,6 +126,13 @@ function createBackButton() {
     // Adjust title styles
     title.style.margin = '0';
     title.style.display = 'inline-block';
+}
+function saveIPAddress(ipAddress) {
+    localStorage.setItem('lastUsedIPAddress', ipAddress);
+}
+    function getLastUsedIPAddress() {
+        return localStorage.getItem('lastUsedIPAddress') || '';
+    
 }
 // IP Address validation and module initialization
 let modulesInitialized = false;
@@ -166,6 +172,7 @@ async function validateIPAddress() {
         if (response.ok) {
             API_BASE_URL = `http://${ipAddress}/control/api/v1`;
             showIPStatusMessage('IP address validated successfully');
+            saveIPAddress(ipAddress); // Save the IP address
             document.getElementById('ipAddressSection').style.display = 'none';
             showModules();
             console.log('showModules called');
@@ -200,6 +207,8 @@ function initializeModules() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    const ipAddressInput = document.getElementById('ipAddressInput');
+    ipAddressInput.value = getLastUsedIPAddress(); // Set the input value
     const validateIPButton = document.getElementById('validateIPButton');
     validateIPButton.addEventListener('click', validateIPAddress);
 

@@ -145,10 +145,13 @@
         input[type="range"]:focus::-ms-fill-upper {
             background: #3071A9;
         }
+        body {
+    padding-top: max(60px, env(safe-area-inset-top));
+}
     </style>
 </head>
 <body>
-    <div class="container" style="position: relative; padding-top: 60px;">
+    <div class="container" style="position: relative; padding-top: 0px;">
         <h1 id="blackmagic-micro-studio-camera-4k-g2-control" class="text-center mb-4">BMMSC 4K G2 Control v0.2.1</h1>
 
         <div id="ipAddressSection" class="module mb-4">

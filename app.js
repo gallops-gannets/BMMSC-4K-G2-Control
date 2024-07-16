@@ -131,6 +131,20 @@ function createBackButton() {
 // IP Address validation and module initialization
 let modulesInitialized = false;
 
+window.toggleModule = function(moduleId) {
+    const moduleContent = document.querySelector(`#${moduleId} .module-content`);
+    const toggleIcon = document.querySelector(`#${moduleId} .toggle-icon`);
+    moduleContent.classList.toggle('show');
+    toggleIcon.textContent = moduleContent.classList.contains('show') ? '▲' : '▼';
+    
+    if (moduleId === 'transportControl') {
+        if (moduleContent.classList.contains('show')) {
+            startFastStatusCheck();
+        } else {
+            stopFastStatusCheck();
+        }
+    }
+};
 function showIPStatusMessage(message, isError = false) {
     const statusMessageDiv = document.getElementById('ipStatusMessage');
     statusMessageDiv.textContent = message;
@@ -180,6 +194,7 @@ function initializeModules() {
         initializeLensControl();
         initializeVideoControl();
         initializeColorCorrection();
+        initializeTransportControl();
         modulesInitialized = true;
     }
 }
@@ -1055,6 +1070,268 @@ function initializeVideoControl() {
 
     // Initial fetch of video settings
     fetchVideoSettings();
+}
+// Transport Control Module
+function initializeTransportControl() {
+    const recordButton = document.getElementById('recordButton');
+    const clipNameInput = document.getElementById('clipName');
+    const timecodeDisplay = document.getElementById('timecodeDisplay');
+    const timecodeSource = document.getElementById('timecodeSource');
+    const transportStatusMessageDiv = document.getElementById('transportStatusMessage');
+    const recordingStatusIndicator = document.getElementById('recordingStatusIndicator');
+    let fastUpdateInterval;
+
+    function updateRecordingStatusIndicator(isRecording) {
+        recordingStatusIndicator.textContent = isRecording ? '🔴' : '⚪';
+        recordingStatusIndicator.title = isRecording ? 'Recording' : 'Not Recording';
+    }
+
+    async function fastStatusCheck() {
+        try {
+            const response = await makeApiCall('/transports/0/record', 'GET');
+            updateRecordingStatusIndicator(response.recording);
+            
+            if (response.recording !== isRecording) {
+                isRecording = response.recording;
+                updateRecordButtonState();
+                showTransportStatusMessage(isRecording ? 'Recording started on camera' : 'Recording stopped on camera');
+                
+                if (isRecording && response.clipName) {
+                    clipNameInput.value = response.clipName;
+                    userEnteredClipName = '';
+                } else {
+                    clipNameInput.value = userEnteredClipName;
+                }
+                updateClipNameInputState();
+            }
+        } catch (error) {
+            console.error('Failed to fetch quick status:', error);
+        }
+    }
+
+    function startFastStatusCheck() {
+        if (!fastUpdateInterval) {
+            fastUpdateInterval = setInterval(fastStatusCheck, 1000); // Check every second
+        }
+    }
+
+    function stopFastStatusCheck() {
+        if (fastUpdateInterval) {
+            clearInterval(fastUpdateInterval);
+            fastUpdateInterval = null;
+        }
+    }
+    let isRecording = false;
+    let timecodeInterval;
+    let statusCheckInterval;
+
+    function showTransportStatusMessage(message, isError = false) {
+        transportStatusMessageDiv.textContent = message;
+        transportStatusMessageDiv.className = 'status-message ' + (isError ? 'status-error' : 'status-success');
+        transportStatusMessageDiv.style.display = 'block';
+        transportStatusMessageDiv.style.opacity = '1';
+        startPeriodicStatusCheck();
+        updateTimecode();
+        fetchTransportStatus();
+        updateTimecode();
+
+        console.log(`Transport Control: ${message}`);
+
+        setTimeout(() => {
+            transportStatusMessageDiv.style.opacity = '0';
+            setTimeout(() => {
+                transportStatusMessageDiv.style.display = 'none';
+            }, 500);
+        }, 3000);
+    }
+
+    function updateRecordButtonState() {
+        if (recordButton.disabled) {
+            return; // Don't update if the button is in a loading state
+        }
+        recordButton.textContent = isRecording ? 'Stop Recording' : 'Start Recording';
+        recordButton.className = isRecording ? 'btn btn-warning' : 'btn btn-danger';
+        updateRecordingStatusIndicator(isRecording);
+        updateClipNameInputState();
+    }
+    
+    clipNameInput.addEventListener('input', () => {
+        if (!isRecording) {
+            userEnteredClipName = clipNameInput.value;
+        }
+    });
+    
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+    
+    const debouncedClipNameUpdate = debounce(() => {
+        if (!isRecording) {
+            userEnteredClipName = clipNameInput.value;
+        }
+    }, 300);
+    
+    clipNameInput.addEventListener('input', debouncedClipNameUpdate);
+    function updateClipNameInputState() {
+        clipNameInput.disabled = isRecording;
+        clipNameInput.placeholder = isRecording ? 'Recording in progress...' : 'Enter clip name (optional)';
+    }
+
+    async function verifyRecordingState() {
+        try {
+            const response = await makeApiCall('/transports/0/record', 'GET');
+            return response.recording;
+        } catch (error) {
+            console.error('Failed to verify recording state:', error);
+            // Instead of returning null, return the last known state
+            return isRecording;
+        }
+    }
+    
+    async function toggleRecording() {
+        const clipName = clipNameInput.value.trim();
+        const expectedState = !isRecording;
+        let requestBody = { recording: expectedState };
+        
+        if (clipName) {
+            requestBody.clipName = clipName;
+            userEnteredClipName = clipName;
+        }
+    
+        // Immediate visual feedback
+        recordButton.disabled = true;
+        recordButton.textContent = expectedState ? 'Starting Recording...' : 'Stopping Recording...';
+        updateRecordingStatusIndicator(expectedState); // Add this line
+        showTransportStatusMessage('Updating recording state...', false);
+    
+        try {
+            await makeApiCall('/transports/0/record', 'PUT', requestBody);
+            
+            // Check status more frequently
+            for (let i = 0; i < 10; i++) {
+                await new Promise(resolve => setTimeout(resolve, 200)); // Wait 200ms
+                const actualRecordingState = await verifyRecordingState();
+                
+                if (actualRecordingState === expectedState) {
+                    isRecording = actualRecordingState;
+                    updateRecordButtonState();
+                    showTransportStatusMessage(isRecording ? 'Recording started' : 'Recording stopped');
+                    if (isRecording) {
+                        clipNameInput.value = '';
+                    }
+                    return; // Exit the function once the state is confirmed
+                }
+            }
+    
+            // If we get here, the state didn't change as expected
+            showTransportStatusMessage('Recording state may not have updated. Please check the camera.', true);
+        } catch (error) {
+            console.error('Failed to toggle recording:', error);
+            showTransportStatusMessage('Failed to toggle recording. Please try again.', true);
+        } finally {
+            recordButton.disabled = false;
+            updateRecordButtonState();
+        }
+    }
+
+    async function updateTimecode() {
+        try {
+            const response = await makeApiCall('/transports/0/timecode', 'GET');
+            const timecodeValue = timecodeSource.value === 'timecode' ? response.timecode : response.clip;
+            timecodeDisplay.textContent = formatTimecode(timecodeValue);
+        } catch (error) {
+            console.error('Failed to update timecode:', error);
+        }
+    }
+
+    function formatTimecode(bcdTimecode) {
+        const hours = parseInt(bcdTimecode.toString(16).padStart(8, '0').substr(0, 2));
+        const minutes = parseInt(bcdTimecode.toString(16).padStart(8, '0').substr(2, 2));
+        const seconds = parseInt(bcdTimecode.toString(16).padStart(8, '0').substr(4, 2));
+        const frames = parseInt(bcdTimecode.toString(16).padStart(8, '0').substr(6, 2));
+        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}:${frames.toString().padStart(2, '0')}`;
+    }
+
+    let userEnteredClipName = '';
+
+    async function fetchTransportStatus() {
+        try {
+            const response = await makeApiCall('/transports/0/record', 'GET');
+            if (isRecording !== response.recording) {
+                isRecording = response.recording;
+                updateRecordButtonState();
+                // Remove the showTransportStatusMessage call from here
+            }
+            
+            if (isRecording) {
+                if (response.clipName) {
+                    clipNameInput.value = response.clipName;
+                    userEnteredClipName = ''; // Clear stored user input when recording starts
+                }
+            } else {
+                // Preserve user entered clip name when not recording
+                if (clipNameInput.value !== userEnteredClipName) {
+                    userEnteredClipName = clipNameInput.value;
+                }
+                clipNameInput.value = userEnteredClipName;
+            }
+            updateClipNameInputState();
+        } catch (error) {
+            console.error('Failed to fetch transport status:', error);
+            // Only show an error message if there's a connection issue
+            showTransportStatusMessage('Failed to fetch transport status. Please check the camera connection.', true);
+        }
+    }
+    if (document.querySelector('#transportControl .module-content').classList.contains('show')) {
+        startFastStatusCheck();
+    }
+    function startPeriodicStatusCheck() {
+        statusCheckInterval = setInterval(fetchTransportStatus, 10000); // Check every 10 seconds instead of 5
+    }
+
+    function stopPeriodicStatusCheck() {
+        if (statusCheckInterval) {
+            clearInterval(statusCheckInterval);
+        }
+    }
+
+    recordButton.addEventListener('click', toggleRecording);
+
+    timecodeSource.addEventListener('change', () => {
+        updateTimecode();
+    });
+
+    // Start updating timecode
+    timecodeInterval = setInterval(updateTimecode, 1000);
+
+    // Initial fetch of transport status and timecode
+    fetchTransportStatus();
+    updateTimecode();
+
+    // Start periodic status check
+    startPeriodicStatusCheck();
+
+    // Clean up function to be called when the module is unloaded or the page is closed
+    function cleanup() {
+        clearInterval(timecodeInterval);
+        stopPeriodicStatusCheck();
+        stopPeriodicStatusCheck();
+        stopFastStatusCheck();
+    }
+
+    // Add event listener for page unload to clean up intervals
+    window.addEventListener('beforeunload', cleanup);
+
+    // Return the cleanup function in case it needs to be called manually
+    return cleanup;
 }
 
 // Color Correction Module

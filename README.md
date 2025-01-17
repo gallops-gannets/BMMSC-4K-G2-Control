@@ -1,5 +1,9 @@
 # BMMSC-4K-G2-Control
-A control app for the BMMSC 4K G2 
+A control app for the BMMSC 4K G2. 
+
+If you find this helpful, please consider tossing me a matcha latte as this testing process was quite time consuming.
+
+<a href="https://www.buymeacoffee.com/craftroomcreative" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
 
 ## About
 This was built to mess around and to fill a particular need for myself. Hopefully you can find some value from it as well! It is intended to be a control panel for the Blackmagic Micro Studio Camera 4K G2 using the REST API. Since this fantastic camera has no screen and many controls seem to be either buried in menus or unable to be set without the help of a hardware or software ATEM, I felt the need existed for a control panel that allows for the basic configuration of the camera.
